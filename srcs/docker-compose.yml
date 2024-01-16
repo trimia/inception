@@ -1,0 +1,75 @@
+# Docker Compose version
+# https://docs.docker.com/compose/compose-file/compose-file-v3/
+version: '3'
+
+# Start of services
+services:
+# Define nginx service:
+  #nginx:
+  # depends_on: wordpress
+  # container_name: nginx
+  # build: .requirements/nginx
+  # env_file:
+  #   - .env
+  # expose:
+  #   -
+  # ports:
+  #   - :
+  # networks:
+  #    - internal
+  # volumes:
+  #   -./wordpress:/var/www/html
+  #
+
+
+  # Define the 'wordpress' service.
+  wordpress:
+    depends_on: 
+      - mariadb
+    # Use the official WordPress Docker image.
+    container_name: wordpress
+    build: ./requirements/wordpress
+    env_file:
+      - .env
+    # Expose port 8080 for communication within the network.
+    expose:
+      - 8080    
+    ports:
+      # Map host port 8080 to container port 80 for external access.
+      - 8080:80    
+    networks:
+      # Connect to the 'internal' network for communication.
+      - internal  
+    volumes:
+      # Mount a local directory as a volume in the container.
+      - ./wordpress:/var/www/html
+
+  # Define the MariaDB service.
+  mariadb:
+    # Use the official MariaDB Docker image.
+    container_name: mariadb
+    build: ./requirements/mariadb
+    env_file:
+      - .env
+
+    expose:
+      # Expose port 3306 for communication within the network.
+      - 3306    
+    ports:
+      # Map host port 3306 to container port 3306 for external access.
+      - 3306:3306    
+    networks: 
+      # Connect to the 'internal' network for communication.
+      - internal
+    # Set environment variables for the MariaDB service.
+    volumes:
+      # Mount a local directory as a volume in the container.
+      - ./db:/var/lib/mysql
+# Define the 'internal' network for inter-container communication.
+networks:
+  internal:
+
+# Define named volumes for data storage.
+volumes:
+  wordpress:
+  db:
