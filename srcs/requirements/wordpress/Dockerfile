@@ -1,21 +1,35 @@
 FROM alpine:3.17
 
+ARG DBWP_NAME
+ARG DBWP_USER
+ARG DBWP_PWD
+ARG DATABASE_HOST
+ARG DOMAIN_NAME
+ARG WP_TITLE
+ARG WP_ADMIN_USR
+ARG WP_ADMIN_PWD
+ARG WP_ADMIN_EMAIL
+ARG WP_USR
+ARG WP_EMAIL
+ARG WP_PWD
+
+
 RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories
 RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories
 RUN apk update && apk upgrade && apk add --no-cache \
           php82 \
           fcgi \
           php82-cgi \
-          wget \
-          mysql \
-          mysql-client \
           php82-mysqli \
           php-fpm \
           php-phar \
           php-cli \
           curl \
           bash \
-          openrc
+        #   wget \
+        #   mysql \
+        #   mysql-client \
+        #   openrc
           #php-mysql
 
 # COPY .env .
@@ -23,7 +37,7 @@ RUN apk update && apk upgrade && apk add --no-cache \
 
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/bin/wp-cli
-RUN wp-cli core download --allow-root --path=/wp
+RUN wp-cli core download --allow-root --path=/var/www/html
 # COPY ./conf/wp-config.php /wp/wp-config.php
 # RUN openrc
 # RUN touch /run/openrc/softlevel
@@ -54,7 +68,7 @@ RUN wp-cli core download --allow-root --path=/wp
 # RUN mysql -e "FLUSH PRIVILEGES"
 
 
-WORKDIR /wp
+WORKDIR /var/www/html
 RUN wp-cli config create --dbname=$DBWP_NAME --dbuser=$DBWP_USER --dbpass=$DBWP_PWD --dbhost=$DATABASE_HOST --allow-root
 RUN wp-cli core install --url=$DOMAIN_NAME/ --title=$WP_TITLE --admin_user=$WP_ADMIN_USR --admin_password=$WP_ADMIN_PWD --admin_email=$WP_ADMIN_EMAIL --skip-email --allow-root
 RUN wp-cli user create $WP_USR $WP_EMAIL --role=author --user_pass=$WP_PWD --allow-root
