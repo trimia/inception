@@ -10,7 +10,7 @@ services:
   # container_name: nginx
   # build: .requirements/nginx
   # env_file:
-  #   - .env
+  #   - ../.env
   # expose:
   #   -
   # ports:
@@ -18,79 +18,86 @@ services:
   # networks:
   #    - internal
   # volumes:
-  #   -./wordpress:/var/www/html
+  #   -wordpress:/var/www/html
   #
 
-
+# services:
   # Define the 'wordpress' service.
-  wordpress:
+  wordpressinc:
     depends_on: 
-      - mariadb
+      mariadbinc:
+        condition: service_completed_successfully
     # Use the official WordPress Docker image.
-    container_name: wordpress
+    container_name: wordpressinc
+    image: wordpressinc
     build: 
-      dockerfile: ./requirements/wordpress/Dockerfile
+      context: .
+      dockerfile: requirements/wordpress/Dockerfile
       args:
-        - DBWP_NAME=$DBWP_NAME
-        - DBWP_USER=$DBWP_USER
-        - DBWP_PWD=$DBWP_PWD
-        - DATABASE_HOST=$DATABASE_HOST
-        - DOMAIN_NAME=$DOMAIN_NAME
-        - WP_TITLE=$WP_TITLE
-        - WP_ADMIN_USR=$WP_ADMIN_USR
-        - WP_ADMIN_PWD=$WP_ADMIN_PWD
-        - WP_ADMIN_EMAIL=$WP_ADMIN_EMAIL
-        - WP_USR=$WP_USR
-        - WP_EMAIL=$WP_EMAIL
-        - WP_PWD=$WP_PWD
-    env_file:
-      - .env
-    # Expose port 8080 for communication within the network.
-    expose:
-      - 8080    
+        - DBWP_NAME=${DBWP_NAME}
+        - DBWP_USER=${DBWP_USER}
+        - DBWP_PWD=${DBWP_PWD}
+        - DATABASE_HOST=${DATABASE_HOST}
+        - DOMAIN_NAME=${DOMAIN_NAME}
+        - WP_TITLE=${WP_TITLE}
+        - WP_ADMIN_USR=${WP_ADMIN_USR}
+        - WP_ADMIN_PWD=${WP_ADMIN_PWD}
+        - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+        - WP_USR=${WP_USR}
+        - WP_EMAIL=${WP_EMAIL}
+        - WP_PWD=${WP_PWD}
+    # env_file:
+    #   - .env
     ports:
-      # Map host port 8080 to container port 80 for external access.
-      - 8080:80    
+      - 9000:9000
     networks:
       # Connect to the 'internal' network for communication.
       - internal  
     volumes:
       # Mount a local directory as a volume in the container.
-      - ./wordpress:/var/www/html
-
+      - wordpress:/var/www/html
   # Define the MariaDB service.
-  mariadb:
+  mariadbinc:
     # Use the official MariaDB Docker image.
-    container_name: mariadb
+    container_name: mariadbinc
+    image: mariadbinc
     build:
-      dockerfile: ./requirements/mariadb/Dockerfile
+      context: .
+      dockerfile: requirements/mariadb/Dockerfile
       args:
-        - DBWP_ROOT_PWD=$DBWP_ROOT_PWD
-        - DBWP_USER=$DBWP_USER
-        - DBWP_NAME=$DBWP_NAME
-
-
-    env_file:
-      - .env
-
-    expose:
-      # Expose port 3306 for communication within the network.
-      - 3306    
-    ports:
-      # Map host port 3306 to container port 3306 for external access.
-      - 3306:3306    
+        - DBWP_NAME=${DBWP_NAME}
+        - DBWP_USER=${DBWP_USER}
+        - DBWP_PWD=${DBWP_PWD}
+        - DBWP_ROOT_PWD=${DBWP_ROOT_PWD}
+    # env_file:
+    #   - .env
+    # restart: always
     networks: 
       # Connect to the 'internal' network for communication.
       - internal
     # Set environment variables for the MariaDB service.
     volumes:
       # Mount a local directory as a volume in the container.
-      - ./db:/var/lib/mysql
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "mariadb"]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 # Define the 'internal' network for inter-container communication.
 networks:
   internal:
-
 # Define named volumes for data storage.
 volumes:
   wordpress:
+    driver: local
+    driver_opts:
+      device: ~/Desktop/vol/data/wordpress
+      o: bind
+      type: none
   db:
+    driver: local
+    driver_opts:
+      device: ~/Desktop/vol/data/mariadb
+      o: bind
+      type: none

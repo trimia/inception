@@ -13,7 +13,10 @@ ARG WP_USR
 ARG WP_EMAIL
 ARG WP_PWD
 
-
+# VOLUME [ "/var/www/html" ]
+# RUN chown -R /var/www/html
+# RUN chown -R root /var/www/html \
+# 	&& chmod -R 775 /var/www/html
 RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories
 RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories
 RUN apk update && apk upgrade && apk add --no-cache \
@@ -24,54 +27,36 @@ RUN apk update && apk upgrade && apk add --no-cache \
           php-fpm \
           php-phar \
           php-cli \
-          curl \
-          bash \
-        #   wget \
-        #   mysql \
-        #   mysql-client \
-        #   openrc
-          #php-mysql
+          curl 
+          # bash \
 
-# COPY .env .
-# RUN export $(grep -v '^#' .env | xargs)
+
+# RUN mkdir -p /var/www/html
 
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/bin/wp-cli
-RUN wp-cli core download --allow-root --path=/var/www/html
-# COPY ./conf/wp-config.php /wp/wp-config.php
-# RUN openrc
-# RUN touch /run/openrc/softlevel
-# CMD ["/bin/bash" ,"-c", "/etc/init.d/mariadb setup"]
-# CMD ["/bin/bash" ,"-c", "rc-service mariadb start"]
-# # CMD ["/etc/init.d/mariadb", "setup"]
-
-# RUN eval "/etc/init.d/mariadb setup"
-# RUN eval "rc-service mariadb start"
-# RUN rc-update add mariadb default
-
-# RUN eval "mysql -sfu <<EOF
-# SET PASSWORD = PASSWORD('$DBWP_ROOT_PWD')
-# DROP USER IF EXISTS ''@'localhost'
-# DROP DATABASE IF EXISTS test
-# CREATE USER IF NOT EXISTS '$DBWP_USER'@'localhost' IDENTIFIED BY '$DBWP_PWD'
-# CREATE DATABASE IF NOT EXISTS $DBWP_NAME
-# GRANT ALL PRIVILEGES ON $DBWP_NAME.* to '$DBWP_USER'@'localhost'
-# FLUSH PRIVILEGES
-# EOF"
-# RUN mysql -e "SET PASSWORD = PASSWORD('$DBWP_ROOT_PWD')"
-# #RUN mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$DBWP_ROOT_PWD'"
-# RUN mysql -e "DROP USER IF EXISTS ''@'localhost'"
-# RUN mysql -e "DROP DATABASE IF EXISTS test"
-# RUN mysql -e "CREATE USER IF NOT EXISTS '$DBWP_USER'@'localhost' IDENTIFIED BY '$DBWP_PWD'"
-# RUN mysql -e "CREATE DATABASE IF NOT EXISTS $DBWP_NAME"
-# RUN mysql -e "GRANT ALL PRIVILEGES ON $DBWP_NAME.* to '$DBWP_USER'@'localhost'"
-# RUN mysql -e "FLUSH PRIVILEGES"
-
-
+RUN mkdir -p /var/www/html
+RUN chown -R root /var/www/html
+RUN chown -R root /var/www/html \
+	&& chmod -R 775 /var/www/html
 WORKDIR /var/www/html
-RUN wp-cli config create --dbname=$DBWP_NAME --dbuser=$DBWP_USER --dbpass=$DBWP_PWD --dbhost=$DATABASE_HOST --allow-root
+RUN wp-cli core download --allow-root --path=/var/www/html
+# RUN wp-cli core download --allow-root \
+#     && wp-cli config create --dbname=$DBWP_NAME --dbuser=$DBWP_USER --dbpass=$DBWP_PWD --dbhost=$DATABASE_HOST --allow-root
+
+
+
+
+# RUN wp-cli core download --allow-root && wp-cli config create --dbname=dbwp --dbuser=user --dbpass=secret --dbhost=mariadbinc --allow-root
+COPY ./requirements/wordpress/conf/wp-config.php /var/www/html/wp-config.php
+# RUN sed -i "s/username_here/${DBWP_USER}}/g" wp-config.php
+# RUN sed -i "s/password_here/${DBWP_PWD}}/g" wp-config.php
+# RUN sed -i "s/localhost/${DATABASE_HOST}}/g" wp-config.php
+# RUN sed -i "s/database_name_here/${DBWP_NAME}}/g" wp-config.php
 RUN wp-cli core install --url=$DOMAIN_NAME/ --title=$WP_TITLE --admin_user=$WP_ADMIN_USR --admin_password=$WP_ADMIN_PWD --admin_email=$WP_ADMIN_EMAIL --skip-email --allow-root
+# RUN wp-cli config create --dbname=$DBWP_NAME --dbuser=$DBWP_USER --dbpass=$DBWP_PWD --dbhost=127.0.0.1 --allow-root
 RUN wp-cli user create $WP_USR $WP_EMAIL --role=author --user_pass=$WP_PWD --allow-root
 RUN wp-cli theme install astra --activate --allow-root
-
+EXPOSE 9000
+ENTRYPOINT ["/usr/sbin/php-fpm82","-F"]
 

@@ -29,7 +29,7 @@ define( 'DB_USER', getenv('DBWP_USER') );
 define( 'DB_PASSWORD', getenv('DBWP_PWD') );
 
 /** Database hostname */
-define( 'DB_HOST', 'localhost' );
+define( 'DB_HOST', getenv('DATABASE_HOST') );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8' );
@@ -64,7 +64,7 @@ define('NONCE_SALT',       '5?t:,+edH`wi)xBc}bIO]-R5h-g%.bc{1&d8WzO0Y~$#DBNp~QH$
  * You can have multiple installations in one database if you give each
  * a unique prefix. Only numbers, letters, and underscores please!
  */
-$table_prefix = 'wp_';
+// $table_prefix = 'wp_';
 
 /**
  * For developers: WordPress debugging mode.
