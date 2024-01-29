@@ -5,9 +5,8 @@ RUN	apk update && apk upgrade && apk add --no-cache \
         openssl \
         curl \
         vim \
-        sudo
-#--no-cache 
-
+        openrc && \
+    openrc && touch /run/openrc/softlevel
 
 # nginx SSL
 RUN mkdir -p /etc/nginx/ssl
@@ -18,13 +17,16 @@ RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
 
 #simple index page
 RUN mkdir -p /www
+RUN chown -R nginx:nginx /www
+
 COPY ./tools/index.html /www/index.html
 # nginx config
 RUN mkdir -p /run/nginx
+RUN chown -R nginx:nginx /run/nginx/ && chmod 775 /run/nginx/
 #RUN rm -f /etc/nginx/nginx.conf
 COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 #COPY conf/nginx.conf /etc/nginx/conf.d/default.conf
-
+# RUN rc-service nginx restart
 EXPOSE 443
 # Start nginx
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

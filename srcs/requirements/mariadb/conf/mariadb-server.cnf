@@ -31,8 +31,8 @@
 #
 # * Basic Settings
 #
-user            = mysql
-pid-file        = /var/run/mysqld/mysqld.pid
+user            = root
+pid-file        = /var/run/mysqld/mariadb.pid
 socket          = /var/run/mysqld/mysqld.sock
 port            = 3306
 bind-address    = 0.0.0.0
@@ -61,7 +61,7 @@ collation-server      = utf8mb4_general_ci
 
 
 
-log_error               = mysql.err
+log_error               = /var/lib/mysql/mariadb.err
 # we do want to know about network errors and such
 log_warnings            = 2
 #

@@ -2,6 +2,30 @@
 # https://docs.docker.com/compose/compose-file/compose-file-v3/
 version: '3'
 
+# Define the 'internal' network for inter-container communication.
+networks:
+  internal:
+    name: internal
+    driver: bridge
+    # ipam:
+    #     driver: default
+    #     config:
+    #       - subnet: "172.17.0.0/16"
+# Define named volumes for data storage.
+volumes:
+  wordpress:
+    driver: local
+    driver_opts:
+      device: ~/Desktop/vol/data/wordpress
+      o: bind
+      type: none
+  db:
+    driver: local
+    driver_opts:
+      device: ~/Desktop/vol/data/mariadb
+      o: bind
+      type: none
+
 # Start of services
 services:
 # Define nginx service:
@@ -23,13 +47,13 @@ services:
 
 # services:
   # Define the 'wordpress' service.
-  wordpressinc:
+  wordpress:
+    container_name: wordpress
     depends_on: 
-      mariadbinc:
-        condition: service_completed_successfully
+      mariadb:
+        condition: service_healthy
     # Use the official WordPress Docker image.
-    container_name: wordpressinc
-    image: wordpressinc
+    image: wordpress:42
     build: 
       context: .
       dockerfile: requirements/wordpress/Dockerfile
@@ -48,19 +72,18 @@ services:
         - WP_PWD=${WP_PWD}
     # env_file:
     #   - .env
-    ports:
-      - 9000:9000
-    networks:
-      # Connect to the 'internal' network for communication.
-      - internal  
     volumes:
       # Mount a local directory as a volume in the container.
       - wordpress:/var/www/html
+    networks:
+      # Connect to the 'internal' network for communication.
+      - internal  
   # Define the MariaDB service.
-  mariadbinc:
+  mariadb:
+    hostname: mariadbinc
     # Use the official MariaDB Docker image.
-    container_name: mariadbinc
-    image: mariadbinc
+    container_name: mariadb
+    image: mariadb42
     build:
       context: .
       dockerfile: requirements/mariadb/Dockerfile
@@ -72,32 +95,16 @@ services:
     # env_file:
     #   - .env
     # restart: always
-    networks: 
-      # Connect to the 'internal' network for communication.
-      - internal
     # Set environment variables for the MariaDB service.
     volumes:
       # Mount a local directory as a volume in the container.
       - db:/var/lib/mysql
+    networks: 
+      # Connect to the 'internal' network for communication.
+      - internal
+        # ipv4_address: 172.17.0.2
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "mariadb"]
       timeout: 10s
       retries: 5
-      start_period: 30s
-# Define the 'internal' network for inter-container communication.
-networks:
-  internal:
-# Define named volumes for data storage.
-volumes:
-  wordpress:
-    driver: local
-    driver_opts:
-      device: ~/Desktop/vol/data/wordpress
-      o: bind
-      type: none
-  db:
-    driver: local
-    driver_opts:
-      device: ~/Desktop/vol/data/mariadb
-      o: bind
-      type: none
+      # start_period: 30s

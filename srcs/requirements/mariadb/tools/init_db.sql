@@ -1,5 +1,10 @@
+DELETE FROM mysql.user WHERE User='';
+-- DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1','192.168.65.1','internal');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
 CREATE DATABASE IF NOT EXISTS dbwpname;
 CREATE USER IF NOT EXISTS 'dbwpuser'@'%' IDENTIFIED BY 'dbwppwd'; 
-GRANT ALL PRIVILEGES ON dbwpname.* to 'dbwpuser'@'%'; 
+GRANT ALL PRIVILEGES ON dbwpname.* to 'dbwpuser'@'%'IDENTIFIED BY 'dbwppwd'; 
 FLUSH PRIVILEGES; 
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'dbwprootpwd';
+ALTER USER 'root'@'%' IDENTIFIED BY 'dbwprootpwd';
