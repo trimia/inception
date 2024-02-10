@@ -6,8 +6,8 @@ nginx:
 
 wp:
 	@docker build srcs/requirements/wordpress/ -t wordpress
+# @docker run -it --name wordpress -p 9000:9000 --privileged --env-file=./srcs/.env wordpress --link mariadb
 	@docker run -it -p 9000:9000 --privileged  wordpress
-#	@docker run -it --name wordpress -p 9000:9000 --privileged --env-file=./srcs/.env wordpress --link mariadb
 
 db:
 	@docker build srcs/requirements/mariadb/ -t mariadb
@@ -18,15 +18,15 @@ dir:
 	cd ~/Desktop && mkdir vol && cd vol && mkdir data && cd data && mkdir wordpress mariadb && cd
 
 comp:dir
-# docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up
+	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up
 #	docker compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env build
-	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up -d mariadb
+#	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up -d mariadb
 
 # Wait for mariadbinc to be healthy
 #	 docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env run --rm wait-mariadb
 
 # Build and start the wordpressinc service
-	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up -d wordpress
+#	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up -d wordpress
 prune:
 	docker-compose -f ./srcs/docker-compose.yml down --volumes
 	docker network prune -f

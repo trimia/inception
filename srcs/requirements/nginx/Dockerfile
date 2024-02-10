@@ -16,18 +16,18 @@ RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
         -subj "/C=IT/ST=Rome/L=Rome/O=42 School/OU=mmariani/CN=mmariani/"
 
 #simple index page
-RUN mkdir -p /www
-RUN chown -R nginx:nginx /www
+# RUN mkdir -p /var/www/html
+# RUN chown -R nginx:nginx /var/www/html
+# COPY ./tools/index.html /www/index.html
 
-COPY ./tools/index.html /www/index.html
 # nginx config
 RUN mkdir -p /run/nginx
 RUN chown -R nginx:nginx /run/nginx/ && chmod 775 /run/nginx/
 #RUN rm -f /etc/nginx/nginx.conf
-COPY ./conf/nginx.conf /etc/nginx/nginx.conf
-#COPY conf/nginx.conf /etc/nginx/conf.d/default.conf
+# COPY ./conf/nginx.conf /etc/nginx/nginx.conf
+COPY ./requirements/nginx/conf/nginx.conf /etc/nginx/nginx.conf
 # RUN rc-service nginx restart
-EXPOSE 443
+# EXPOSE 433
 # Start nginx
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
 

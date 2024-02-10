@@ -4,9 +4,9 @@ version: '3'
 
 # Define the 'internal' network for inter-container communication.
 networks:
-  internal:
-    name: internal
-    driver: bridge
+  inception:
+    name: inception
+    # driver: bridge
     # ipam:
     #     driver: default
     #     config:
@@ -29,22 +29,24 @@ volumes:
 # Start of services
 services:
 # Define nginx service:
-  #nginx:
-  # depends_on: wordpress
-  # container_name: nginx
-  # build: .requirements/nginx
-  # env_file:
-  #   - ../.env
-  # expose:
-  #   -
-  # ports:
-  #   - :
-  # networks:
-  #    - internal
-  # volumes:
-  #   -wordpress:/var/www/html
-  #
-
+  nginx:
+    container_name: nginx
+    depends_on: 
+      - wordpress
+    image: nginx:42
+    build:
+      context: .
+      dockerfile: requirements/nginx/Dockerfile
+    expose:
+      - 443
+    ports:
+      - 443:443
+    env_file:
+      - .env
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception
 # services:
   # Define the 'wordpress' service.
   wordpress:
@@ -70,17 +72,19 @@ services:
         - WP_USR=${WP_USR}
         - WP_EMAIL=${WP_EMAIL}
         - WP_PWD=${WP_PWD}
-    # env_file:
-    #   - .env
+    # ports:
+    #   - 9000:9000
+    env_file:
+      - .env
     volumes:
       # Mount a local directory as a volume in the container.
       - wordpress:/var/www/html
     networks:
       # Connect to the 'internal' network for communication.
-      - internal  
+      - inception  
   # Define the MariaDB service.
   mariadb:
-    hostname: mariadbinc
+    # hostname: mariadbinc
     # Use the official MariaDB Docker image.
     container_name: mariadb
     image: mariadb42
@@ -92,6 +96,8 @@ services:
         - DBWP_USER=${DBWP_USER}
         - DBWP_PWD=${DBWP_PWD}
         - DBWP_ROOT_PWD=${DBWP_ROOT_PWD}
+    # expose:
+        # - 3306
     # env_file:
     #   - .env
     # restart: always
@@ -101,10 +107,10 @@ services:
       - db:/var/lib/mysql
     networks: 
       # Connect to the 'internal' network for communication.
-      - internal
+      - inception
         # ipv4_address: 172.17.0.2
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "mariadb"]
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 3s
+      retries: 3
       # start_period: 30s
