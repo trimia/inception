@@ -62,6 +62,7 @@ RUN wp-cli core download --allow-root
 #     && wp-cli config create --dbname=$DBWP_NAME --dbuser=$DBWP_USER --dbpass=$DBWP_PWD --dbhost=$DATABASE_HOST --allow-root
 # COPY ./tools/init_wp.sh /var/www/html/init_wp.sh
 COPY ./requirements/wordpress/tools/init_wp.sh /var/www/html/init_wp.sh
+COPY ./requirements/wordpress/tools/inception.WordPress.2024-02-10.xml /var/www/html/inception.WordPress.2024-02-10.xml
 RUN chmod +x init_wp.sh
 
 
