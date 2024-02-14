@@ -1,4 +1,11 @@
+directory = ~/mmariani
 
+all: | $(directory)
+	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up
+
+$(directory):
+	@echo "Folder $(directory) does not exist"
+	@cd ~ && mkdir mmariani && cd mmariani && mkdir data && cd data && mkdir wordpress mariadb && cd
 
 nginx:
 	@docker build srcs/requirements/nginx -t nginx
@@ -14,8 +21,16 @@ db:
 	@docker run -it --name mariadb -p 3306:3306 --privileged  mariadb 
 # @docker run -it -p 3306:3306 --env-file=/../../.env mariadb
 
+
 dir:
-	cd ~/Desktop && mkdir vol && cd vol && mkdir data && cd data && mkdir wordpress mariadb && cd
+	ifeq [-f ./mmariani]
+		echo "mmariani alredy created"
+	else
+		@cd ~ && mkdir mmariani && cd mmariani && mkdir data && cd data && mkdir wordpress mariadb && cd
+	endif
+
+host:
+	@echo "127.0.0.1		mmariani.42.fr" >> /etc/hosts
 
 comp:dir
 	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up
@@ -30,9 +45,11 @@ comp:dir
 prune:
 	docker-compose -f ./srcs/docker-compose.yml down --volumes
 	docker network prune -f
+	@docker system prune -af
 # $(docker stop $(docker ps -aq))
 # $(docker rm $(docker ps -aq))
 #$(docker rmi -f $(docker images -q))
-	rm -rf ~/Desktop/vol
+
+rmdir:
+	rm -rf ~/mmariani
 #remember to remove and clean network
-	@docker system prune -af

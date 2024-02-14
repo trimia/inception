@@ -11,10 +11,12 @@ RUN apk update && apk upgrade && apk add --no-cache \
           mysql-client \
           openrc
 # RUN sudo chown -R mysql:mysql /var/lib/mysql
-# RUN chmod -R 750 /var/lib/mysql
+RUN chown -R root /var/lib/mysql
+RUN chmod -R 750 /var/lib/mysql
 # start openrc
 RUN openrc 
 RUN touch /run/openrc/softlevel
+# RUN openrc 
 
 # COPY ./conf/mariadb-server.cnf /etc/my.cnf
 COPY ./requirements/mariadb/conf/mariadb-server.cnf /etc/my.cnf
@@ -25,8 +27,8 @@ RUN sed -i "s/dbwpname/${DBWP_NAME}/g" /init_db.sql
 RUN sed -i "s/dbwpuser/${DBWP_USER}/g" /init_db.sql
 RUN sed -i "s/dbwppwd/${DBWP_PWD}/g" /init_db.sql
 RUN sed -i "s/dbwprootpwd/${DBWP_ROOT_PWD}}}/g" /init_db.sql
-RUN rc-service mariadb setup && rc-service mariadb start && mysql -sfu root < /init_db.sql
-EXPOSE 3306
+# RUN rc-service mariadb setup && rc-service mariadb start && mysql -sfu root < /init_db.sql
+# EXPOSE 3306
 # COPY ./tools/db.sh /
 COPY ./requirements/mariadb/tools/db.sh /
 RUN chmod +x /db.sh
