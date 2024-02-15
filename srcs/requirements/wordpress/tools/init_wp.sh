@@ -25,6 +25,7 @@ wp-cli core install --url=${DOMAIN_NAME} --title=${WP_TITLE} --admin_user=${WP_A
 # wp-cli config set WP_SITEURL "http://localhost:9000"
 wp-cli user create ${WP_USR} ${WP_EMAIL} --role=author --user_pass=${WP_PWD} --allow-root
 wp-cli theme install astra --activate --allow-root
+wp-cli plugin install wordpress-importer --activate
 wp-cli import inception.WordPress.2024-02-10.xml --authors=create
 /usr/sbin/php-fpm82 -F
 

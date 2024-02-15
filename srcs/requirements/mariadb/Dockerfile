@@ -27,7 +27,7 @@ RUN sed -i "s/dbwpname/${DBWP_NAME}/g" /init_db.sql
 RUN sed -i "s/dbwpuser/${DBWP_USER}/g" /init_db.sql
 RUN sed -i "s/dbwppwd/${DBWP_PWD}/g" /init_db.sql
 RUN sed -i "s/dbwprootpwd/${DBWP_ROOT_PWD}}}/g" /init_db.sql
-# RUN rc-service mariadb setup && rc-service mariadb start && mysql -sfu root < /init_db.sql
+RUN rc-service mariadb setup && rc-service mariadb start && mysql -sfu root < /init_db.sql
 # EXPOSE 3306
 # COPY ./tools/db.sh /
 COPY ./requirements/mariadb/tools/db.sh /

@@ -1,11 +1,11 @@
-directory = ~/mmariani
+directory = /home/mmariani
 
 all: | $(directory)
 	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up
 
 $(directory):
 	@echo "Folder $(directory) does not exist"
-	@cd ~ && mkdir mmariani && cd mmariani && mkdir data && cd data && mkdir wordpress mariadb && cd
+	@cd /home/mmariani && mkdir data && cd data && mkdir wordpress mariadb && cd
 
 nginx:
 	@docker build srcs/requirements/nginx -t nginx
@@ -30,14 +30,10 @@ xubuntu:
 
 
 dir:
-	ifeq [-f ./mmariani]
-		echo "mmariani alredy created"
-	else
-		@cd ~ && mkdir mmariani && cd mmariani && mkdir data && cd data && mkdir wordpress mariadb && cd
-	endif
+		@cd /home/mmariani && mkdir data && cd data && mkdir wordpress mariadb && cd
 
 host:
-	@echo "127.0.0.1		mmariani.42.fr" >> /etc/hosts
+	@echo "127.0.0.1	mmariani.42.fr" >> /etc/hosts
 
 comp:dir
 	docker-compose -f ./srcs/docker-compose.yml --env-file ./srcs/.env up
@@ -52,11 +48,11 @@ comp:dir
 prune:
 	docker-compose -f ./srcs/docker-compose.yml down --volumes
 	docker network prune -f
+	$(docker stop $(docker ps -aq))
+	$(docker rm $(docker ps -aq))
+	$(docker rmi -f $(docker images -q))
 	@docker system prune -af
-# $(docker stop $(docker ps -aq))
-# $(docker rm $(docker ps -aq))
-#$(docker rmi -f $(docker images -q))
 
 rmdir:
-	rm -rf ~/mmariani
+	rm -rf /home/mmariani/data
 #remember to remove and clean network
