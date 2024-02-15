@@ -21,6 +21,13 @@ db:
 	@docker run -it --name mariadb -p 3306:3306 --privileged  mariadb 
 # @docker run -it -p 3306:3306 --env-file=/../../.env mariadb
 
+xubuntu:
+	apt-get update
+	apt-get upgrade
+	snap install --classic code
+	apt-get install docker
+	apt-get install docker-compose
+
 
 dir:
 	ifeq [-f ./mmariani]
